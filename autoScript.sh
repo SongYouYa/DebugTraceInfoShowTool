@@ -202,30 +202,13 @@ echo            <td style="padding-left: 10px; padding-top: 10x; vertical-align:
 echo                 <img src="data:image/png;base64,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">\n
 echo             </td>\n
 echo            <td>\n
-echo                 <p style="margin-bottom:4px; margin-top:2px;">Viewing stacktrace for event <a href="https://www.diagnostics.ford.com/event/2DF6F690BB56A62DCD6A45CC6FE2CAA8">2DF6F690BB56A62DCD6A45CC6FE2CAA8</a></p>\n
+echo                 <p style="margin-bottom:4px; margin-top:2px;">Viewing stacktrace for event</p>\n
 echo                 <pre style=""><strong>Platform:</strong> SYNC4</pre>\n
 echo                 <pre style=""><strong>OS:</strong> Sync4-master-sync4-imx8-824</pre>\n
 echo                 <pre style=""><strong>Date:</strong> Sat Jun 22 13:04:15 EDT 2019</pre>\n
-echo                 <pre style=""><strong>VIN:</strong> 1FTEW1CP5JFB89133</pre>\n
-echo                 <pre style=""><strong>Agent:</strong> 1.0.0</pre>\n
 echo                 <div style="margin-top: 4px; margin-left: 3px;">\n
 echo                     <i class="fa fa-envelope"></i>\n
 echo                     <a href="mailto:jtassie@ford.com;dmart526@ford.com;dyohan@ford.com;jliick@ford.com?subject=Problem with stacktrace 2DF6F690BB56A62DCD6A45CC6FE2CAA8">report a problem</a>\n
-echo 
-echo                         <i class="fa fa-list-ul"></i>\n
-echo     <a href="https://www.diagnostics.ford.com/api/event/C727D3197A2F427CEA7F105E2EF1FE9B/files/48405728/view" target="_blank">raw stacktrace</a>\n
-echo 
-echo     <i class="fa fa-linux"></i>\n
-echo     <a href="https://www.diagnostics.ford.com/api/log/files/4427926/view" target="_blank">agent logs</a>\n
-echo 
-echo     <i class="fa fa-download"></i>\n
-echo     <a href="https://www.diagnostics.ford.com/api/event/C727D3197A2F427CEA7F105E2EF1FE9B/files/48405129/download" target= "_blank">core file</a>\n
-echo 
-echo     <i class="fa fa-list-ul"></i>\n
-echo     <a href="https://www.nexus.ford.com/#browse/browse:fnv2_private_release_repository:com%2Fford%2Fsync%2Fsync4_0%2Fmaster-integration%2FMU5T-14G670-FAE%2F00715-Sync4-master-sync4-imx8-824-56a8b710a9" target= "_blank">nexus</a>\n
-echo 
-echo     <i class="fa fa-download"></i>\n
-echo     <a href="https://www.nexus.ford.com/repository/fnv2_private_release_repository/com/ford/sync/sync4_0/master-integration/MU5T-14G670-FAE-sym/00715-Sync4-master-sync4-imx8-824-56a8b710a9/MU5T-14G670-FAE-sym-00715-Sync4-master-sync4-imx8-824-56a8b710a9.tar.gz" target= "_blank">download symbols</a>\n
 echo 
 echo                 </div>\n
 echo             </td>\n
