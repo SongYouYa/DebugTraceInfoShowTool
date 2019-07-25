@@ -445,6 +445,8 @@ if __name__ == "__main__":
 ###################################################################
     gzfilelist = []
     absoluteRomLIbpath = os.getcwd() + "/" +sys.argv[1]
+    envpathcmd = "export PATH=$PATH:"+absoluteRomLIbpath
+    os.system(envpathcmd) 
     gzfilelist = file_name_filter(absoluteRomLIbpath,'.gzaa')
     if len(gzfilelist ):
         print("gzaa file sucess find!")
@@ -493,7 +495,6 @@ if __name__ == "__main__":
     #
     #---------------------------------------------------------------------------------
     cmdline = "/opt/qnx700/host/linux/x86_64/usr/bin/ntoaarch64-gdb -batch -x autoScript.sh " +  navigationpath  +" "  +absoluteRomLIbpath +"/"+ sys.argv[3]  + " >" + sys.argv[3] + ".html"
-    os.system("export PATH=$PATH:" +absoluteRomLIbpath ) 
     #get file which form is html/
     cpnavigationcore = "cp -a " + sys.argv[3] +" " + absoluteRomLIbpath
     os.system(cpnavigationcore)
