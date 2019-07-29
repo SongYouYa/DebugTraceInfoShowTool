@@ -11,17 +11,43 @@ import subprocess
 import argparse
 import time
 import requests
-from progressbar import *
-isServer = 1
-# 替换为空
-replace_sharepath = "//172.16.100.82/Kipawa/romlib/"
 
 import subprocess 
 import sys
-
 pidList = []
 errorList =[]
 warningList=[]
+
+sysargv1=""
+sysargv2=""
+sysargv3=""
+sysargv4=""
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--romnum", help="import a rom num for example -r ROM860 ", type=str)
+parser.add_argument("--softpkg", help="num of file which contain network  -n 20190707 cbd49e93 is a slice of file name", type=str)
+parser.add_argument("--core", help="-c navigation-1286231_241_1SN004I1_1.core", type=str)
+parser.add_argument("--cover", help="whether to cach date , if date have been downloaded in you local place you can set the value is n ", type=str)
+args = parser.parse_args()
+if args.romnum:
+    print args.romnum
+if args.softpkg:
+    print args.softpkg
+if args.core:
+    print args.core
+if args.cover:
+    print args.cover
+
+sysargv1= args.romnum
+sysargv2=args.softpkg
+sysargv3=args.core
+sysargv4=args.cover
+
+absoluteRomLibpath = os.getcwd() + "/" +sysargv1
+htmlZipFile = "Kipawa-qnx-700-1.26r." + sysargv2  + '_dev-unstripped.zip' #------------------------set a params
+navigationpath  = os.getcwd() + "/"+sysargv1+ "/navigation"
+absoluteRomLibcopy = os.getcwd() + "/" +sysargv1+"-lib"
 
 #-------------------------------------------------
 # @param file_dir  file path
@@ -34,6 +60,14 @@ def file_name_filter(file_dir,filter):
         for file in files:
             if os.path.splitext(file)[1]== filter :
                 fileterFileList.append(os.path.join(root,file))
+    return fileterFileList
+
+
+def file_name_list(file_dir):
+    fileterFileList=[]
+    for root,firs,files in os.walk(file_dir):
+        for file in files:
+            fileterFileList.append(os.path.join(root,file))
     return fileterFileList
 
 
@@ -56,7 +90,6 @@ def keyword_finder_from_line(file,serchParam,listVec,worngParam,worngParam1,warn
         #print line
         else :
             continue
-
 
 def insert_line_into_file(filepath,insertParam):
     #insert text to  indeed pos
@@ -99,8 +132,8 @@ def delete_file__header_data(filepath,deleteParam):
             else:
                 w.write(l) 
     
-def gethehtmldoc():
-    htmlfilename =  sys.argv[3]+'.html'  
+def generate_html_doc():
+    htmlfilename =  sysargv3+'.html'  
     print ("begin to run main fun")
     keyword_finder_from_line(htmlfilename ,"[New pid",pidList,"Pr","#0","++")
     insert_line_into_file(htmlfilename ,"beginLabel") 
@@ -109,7 +142,7 @@ def gethehtmldoc():
     insert_line_into_file(htmlfilename,"waringLabel")  
     delete_file__header_data(htmlfilename ,"<html>")
 
-def unZip(listzipfiled):
+def un_Zip_files(listzipfiled):
         for file_name in listzipfiled:
             print('was unziping:' + file_name)
             if os.path.splitext(file_name)[1] == '.zip':
@@ -131,7 +164,6 @@ def unZip(listzipfiled):
                     #     urllib.request.urlretrieve(zipurl, work_path)
                     # except:
                         continue
-
 
 # 打开共享文件夹,从服务器下载文件
 def files_download(sharefilepath):
@@ -160,7 +192,7 @@ def getfiledir_download(sharpath,localdir):
     return filelist
 
 # 上传服务器
-def getfiledir_upload(childpath,sharpath):
+def get_file_dir_upload(childpath,sharpath):
     childspath = ""
     filelist = os.listdir(childpath)
     for files in filelist:
@@ -179,7 +211,7 @@ def getfiledir_upload(childpath,sharpath):
 
 # 复制文件 或 文件夹 至本地存放
 def copyfile_download(paths, childpath):
-    localpath = os.path.split(os.path.realpath(sys.argv[0]))[0] + "\\romlib"  #must set a value is the same with remte director
+    localpath = os.path.split(os.path.realpath(sysargv0))[0] + "\\romlib"  #must set a value is the same with remte director
     putpath = path(paths, localpath, replace_sharepath)
     shutil.copy(paths, putpath)
    
@@ -204,7 +236,7 @@ def path(sharpath, localpat, replacepath):
     #处理traceScript 导出固定的html文档 文档的名字也可以相应的进行自动化处理
     #结果与处理的文档的结尾编号日期
     #----------------------------------------------------------------------------
-def recutsioncopy(srcpath,dstpath):
+def recurse_copy(srcpath,dstpath):
     if not os.path.exists(srcpath):
         print ('srcpath not exist!')
     if not os.path.exists(dstpath):
@@ -212,14 +244,6 @@ def recutsioncopy(srcpath,dstpath):
     for root,dirs,files in os.walk(srcpath,True):
         for eachfile in files:
             shutil.copy(os.path.join(root,eachfile),dstpath)
-#查找文件是否存在
-def findfile(start, name):
-	for name2 in os.listdir(start):
-		if name2 == name:
-			return 1
-		else :
-			return 0
-
 def excuteCmd(cmd, passwd, timeout = 1):
         s = subprocess.Popen(cmd,stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell = True) 
         s.stdin.write(passwd+'\n')
@@ -238,25 +262,26 @@ def mkdir(path):
 		print ("---  There is this folder!  ---")
 		
 #从服务器下载解压文件并筛选.so文件复制到指定的目录下
-def meterialPrepare():	
+def meterial_prepare():	
 	#---------------------------
 	#download gazz for window server
 	#method using the ftp shell script 
 	#----------------------------
-	findFiles = []
-	absoluteRomLIbpath = os.getcwd() + "/" + sys.argv[1]
 	
-	findFiles = file_name_filter(absoluteRomLIbpath ,'.gzaa')
+	findFiles = []
+	mkdir(absoluteRomLibpath)
+	mkdir(absoluteRomLibcopy)
+	findFiles = file_name_filter(absoluteRomLibpath ,'.gzaa')
 	if len(findFiles):
 		print('find gzaa file path is :',findFiles)
 	else:
 		print("the gzaa file is not exits download  from windows server........")
-		downloadfilecmdline ='sh '+ os.getcwd() +"/ftpdownloadfile.sh" + " " +sys.argv[1]
+		downloadfilecmdline ='sh '+ os.getcwd() +"/ftpdownloadzip.sh" + " " +sysargv1
 		print(downloadfilecmdline)
 		os.system(downloadfilecmdline)
 
 	isexistfile = []
-	isexistfile = file_name_filter(absoluteRomLIbpath,'.gzaa')
+	isexistfile = file_name_filter(absoluteRomLibpath,'.gzaa')
 	if len(isexistfile):
 		print("download the zip file sucesss!")
 	else:
@@ -265,26 +290,31 @@ def meterialPrepare():
 
 	#unzip gzaa
 	str5 = "".join(isexistfile[0])
-	unzipcmdline = "cat " +str5 + " >> " + absoluteRomLIbpath + "/Intermediate.tar.gz"
+	unzipcmdline = "cat " +str5 + " >> " + absoluteRomLibpath + "/Intermediate.tar.gz"
 	print("unzip tar.gzaa is:",unzipcmdline)
 	
 	intermediatarpath = os.getcwd() + "/Intermediate.tar.gz"
-	interdiate_fzip_path = absoluteRomLIbpath +"/" + "Intermediate.tar.gz"
-	interdiate_tar_path = absoluteRomLIbpath  +"/"+"Intermediate.tar"
+	interdiate_fzip_path = absoluteRomLibpath +"/" + "Intermediate.tar.gz"
+	interdiate_tar_path = absoluteRomLibpath  +"/"+"Intermediate.tar"
 	if os.path.exists(intermediatarpath):
-		os.system("tar zvxf " +interdiate_fzip_path + " -C " + absoluteRomLIbpath )
-		#os.system("tar zvxf "+interdiate_tar_path +" -C " + absoluteRomLIbpath )
+		os.system("tar zvxf " +interdiate_fzip_path + " -C " + absoluteRomLibpath )
 	else:
 		os.system(unzipcmdline)
-		os.system("tar zvxf " +interdiate_fzip_path + " -C " + absoluteRomLIbpath )
-		#os.system("tar zvxf "+interdiate_tar_path +" -C " + absoluteRomLIbpath )
-	#进一步进行解压xz 结尾的文件
+		os.system("tar zvxf " +interdiate_fzip_path + " -C " + absoluteRomLibpath )
 
+	#获取必要的html头信息
+	handle_html_header()
+
+	#delete the tem lib file
+	os.system("rm  -rf " + interdiate_fzip_path)
+	os.system("rm  -rf " + unzipcmdline)
+	os.system("rm -rf " +str5)
+	
 	xzfileList = []
 	xzfileList = file_name_filter('./','.xz')
-	intermediatarpath0 = absoluteRomLIbpath + "/TEMP0"
-	intermediatarpath1 = absoluteRomLIbpath  +"/TEMP1"
-	intermediatarpath2 = absoluteRomLIbpath  +"/TEMP0/aarch64le/usr/lib/qt"
+	intermediatarpath0 = absoluteRomLibpath + "/TEMP0"
+	intermediatarpath1 = absoluteRomLibpath  +"/TEMP1"
+	intermediatarpath2 = absoluteRomLibpath  +"/TEMP0/aarch64le/usr/lib/qt"
 	mkdir(intermediatarpath0)
 	mkdir(intermediatarpath1)
 	print ("[>>>>>>>>>>>>>>>>>>>---------------------------------------]30.00%")
@@ -296,6 +326,11 @@ def meterialPrepare():
 	cmdlinexz1 = "tar  -xJf  " +strxz1 + "  -C " + intermediatarpath1
 	os.system(cmdlinexz0)
 	os.system(cmdlinexz1)
+	#delete the middle file
+	print("begine to delete strxz  file..............................")
+	os.system("rm -rf " +strxz0)
+	os.system("rm -rf " +strxz1)
+	print("end to delete strxz  file..............................")
 
 	#####################################
 	####获取文件夹下的所有.so文件
@@ -306,9 +341,7 @@ def meterialPrepare():
 		for file in files:
 			tempfilepath = os.path.join(root,file)
 			isfind = tempfilepath.find('.so')
-			if isfind == -1:
-				process_bar.show_process(60)
-			else :
+			if isfind != -1:
 				lib_file_path_list.append(tempfilepath)
 
 	lib_file_path_list1 = []
@@ -321,7 +354,7 @@ def meterialPrepare():
 			else :
 				lib_file_path_list1.append(tempfilepath)
 
-	libpath = os.getcwd() +"/"+sys.argv[1]
+	libpath = os.getcwd() +"/"+sysargv1
 	mkdir(libpath)
 	print ("[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>-------------------]60.00%")
 	print("......")
@@ -337,59 +370,28 @@ def meterialPrepare():
 
 	#for filepath2 in lib_file_path_list2 :
 		#os.system("cp -a " + filepath2 + " " + libpath )
+	print("begin to delete TEM dir...................")
+	#os.system("rm -rf " + intermediatarpath0)
+	#os.system("rm -rf " + intermediatarpath1)
+	print("begin to delete lib dir..............")
+	os.system("rm -rf  " +absoluteRomLibpath)
+	#os.system("rm -rf  " +absoluteRomLibpath+"_")
+	print("unload lib file sucess>>>>>>>>>>>>>>>>>>>>>>>ok!")
 
 
-class ShowProcess():
-    """
-    显示处理进度的类
-    调用该类相关函数即可实现处理进度的显示
-    """
-    i = 0 # 当前的处理进度
-    max_steps = 0 # 总共需要处理的次数
-    max_arrow = 50 #进度条的长度
-    infoDone = 'done'
-
-    # 初始化函数，需要知道总共的处理次数
-    def __init__(self, max_steps, infoDone = 'Done'):
-        self.max_steps = max_steps
-        self.i = 0
-        self.infoDone = infoDone
-
-    # 显示函数，根据当前的处理进度i显示进度
-    # 效果为[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>]100.00%
-    def show_process(self, i=None):
-        if i is not None:
-            self.i = i
-        else:
-            self.i += 1
-        num_arrow = int(self.i * self.max_arrow / self.max_steps) #计算显示多少个'>'
-        num_line = self.max_arrow - num_arrow #计算显示多少个'-'
-        percent = self.i * 100.0 / self.max_steps #计算完成进度，格式为xx.xx%
-        process_bar = '[' + '>' * num_arrow + '-' * num_line + ']'\
-                      + '%.2f' % percent + '%' + '\r' #带输出的字符串，'\r'表示不换行回到最左边
-        sys.stdout.write(process_bar) #这两句打印字符到终端
-        #sys.stdout.flush()
-        if self.i >= self.max_steps:
-            self.close()
-
-    def close(self):
-        print('')
-        print(self.infoDone)
-        self.i = 0
-
-def modifiedHtmlHeaderInfo(filepath,platform,os,date):
+def modified_html_header_info(filepath,platform,os,date):
     data = ''
     with open(filepath, 'r+') as f:
         for line in f.readlines():
             if(line.find('Platform:<') != -1):
                 line = r"echo                 <pre style=""><strong>Platform:</strong>" +platform+"</pre>\n"
-                print(line)
+                #print(line)
             elif(line.find('OS:<') != -1):
                 line = r"echo                 <pre style=""><strong>OS:</strong>" +os+"</pre>\n"
-                print(line)
+                #print(line)
             elif(line.find('Date:<') != -1):
                 line = r"echo                 <pre style=""><strong>Date:</strong> "+date+"</pre>\n"
-                print(line)
+                #print(line)
             data += line
 
     with open(filepath, 'r+') as f:
@@ -405,53 +407,9 @@ def get_FileCreateTime(filePath):
     return TimeStampToTime(t)
 
 
-if __name__ == "__main__":
-    max_steps = 100
-    print (">------------------------------------------]1.00%")
-    process_bar = ShowProcess(max_steps, 'OK')
-
-    process_bar.show_process(2)
-    # if isServer:
-    #     #上传本地的原始文件到共享目录，一般这一步服务者进行选择的选项
-    #     sharepath = "//172.16.100.82/Kipawa/romlib/"
-    #     #filepath = "D:/TreasureDir/Tempfile"
-    #     localfilepath="D:/testdirupdown/" #
-    #     files_upload(localfilepath,sharepath)
-#############################################################
-#set the param guild the users how to using the script
-#############################################################
-    # path = "//172.16.100.82/Kipawa/romlib/"
-    # zipfileList = files_download(path)
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('string', metavar='->', type=str, nargs='+',
-                   help='python3.6  pachong.py  "ROM805" "20190707.cbd49e93" navigation-1286231_241_1SN004I1_1.core')
-    parser.add_argument('string1', metavar='805', type=str, nargs='+',
-                   help='860 is a num of zip  of bench which contains  share library file')
-    parser.add_argument('string', metavar='1', type=str, nargs='+',
-                   help='1 whether  redownload file from server if local have been files  you can set num is 0')
-
-    args = parser.parse_args()
-    mkdir(sys.argv[1]) #mkadir a romdir which is used to contain .so and mid file which is generated by run program
-    #print (">>>>>>-------------------------------------]5.00%")
-    print("......")
-
-#############################################################
-#get lib file from windows server
-#############################################################
-    if sys.argv[4] == '1' :
-        meterialPrepare()
-        print("was get source file from window server...........")
-    else :
-        print("run the script no overright file before")
-    print (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>-------------------------------------]50.00%")
-
-#########################
-#
-#modified the html head info 
-###################################################################
+def handle_html_header():
     gzfilelist = []
-    absoluteRomLIbpath = os.getcwd() + "/" +sys.argv[1]
-    gzfilelist = file_name_filter(absoluteRomLIbpath,'.gzaa')
+    gzfilelist = file_name_filter(absoluteRomLibpath,'.gzaa')
     if len(gzfilelist ):
         print("gzaa file sucess find!")
     else:
@@ -463,54 +421,105 @@ if __name__ == "__main__":
     print("filecreattime is :",ossysystem)
     print("gzzfilepath  is :",gzzfilename)
     print("gzzfilepath is :",filecreattime)
-    modifiedHtmlHeaderInfo('./autoScript.sh','SYNC4',ossysystem ,filecreattime )  
+    modified_html_header_info('./autoScript.sh','SYNC4',ossysystem ,filecreattime) 
 
-#############################################################
-#download the cbd49e93_dev-unstripped.zip from network
-#############################################################
-    urllist2 = "http://tar1.telenav.com:8080/repository/telenav/client/trunk/Kipawa/Kipawa-qnx-700-1.26r." + sys.argv[2] + "_dev-unstripped.zip"      
-    htmlZipFile = "Kipawa-qnx-700-1.26r." + sys.argv[2]  + '_dev-unstripped.zip' #------------------------set a params
-    absolutehtmlzipfilepath = os.getcwd() + "/" +sys.argv[1] +"/"+ htmlZipFile  
-    
-    mkdir(absoluteRomLIbpath)
-    navigationpath  = os.getcwd() + "/"+sys.argv[1]+ "/navigation"
-    print("absolutehtmlzipfilepath  path is :",absolutehtmlzipfilepath )
-    isestience = sys.argv[4]
-    print("is existence the zip ifle 1 yes 0 no  value is:",isestience )
-    r = requests.get(urllist2 , stream=True)
-    if isestience == '1' :
-        with open(absoluteRomLIbpath+ "/"+htmlZipFile ,"wb") as pdf:
-            for chunk in r.iter_content(chunk_size=1024):
-                if chunk:
-                    pdf.write(chunk)
-    else:
-        print ("the html zip file is existence!unzip directly!")
-    print (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>-----------]85.00%")
-#############################################################
-#unzip html files
-#############################################################  
-    unzipfileqnxpath = "unzip -o " + absolutehtmlzipfilepath  +  " -d  " +absoluteRomLIbpath 
+def download_lib_file_from_network():
+    #ftp upload the files
+    mkdir(absoluteRomLibpath)
+    print("begin to download lib from network this will cost about one minutes please waiting..............")
+    downloadlibcmdline ='sh '+ os.getcwd() +"/ftpdownloadlib.sh" + " " +sysargv1
+    #print("downloadlibcmdline is :",downloadlibcmdline)
+    os.system(downloadlibcmdline )
+    print("finish downloading lib from network..............")
+
+def get_dependence_lib_list():
+    mkdir(absoluteRomLibcopy)
+    f =open("dependanceLlibList.txt")
+    lib_name_lists =list()
+    for line in f.readlines():
+        line =line.strip()
+        lib_name_lists.append(line)
+    f.close()
+    result_file_lists =list()
+    result_file_lists = file_name_list(absoluteRomLibpath)
+
+    for varfile in lib_name_lists:
+        tag=0
+        for namepath in result_file_lists:
+            errorvalue = namepath.rfind(varfile)
+            if errorvalue != -1:
+                print("the lib file is find :",varfile)
+                temfileppath = "cp -a " + namepath + "  " +absoluteRomLibcopy 
+                #print(temfileppath)
+                tag=1
+                os.system(temfileppath)
+                break
+        if tag ==0 :
+            print("no matched lib file is:",varfile ) 
+    #ftp upload the files
+    uploadfilecmdline ='sh '+ os.getcwd() +"/ftpuploadlib.sh" + " " +sysargv1
+    print("uploadfilecmdline is :",uploadfilecmdline )
+    os.system(uploadfilecmdline)
+    #delete swap dir
+    os.system("rm -rf " + absoluteRomLibcopy)
+
+def unzip_zip() :
+    absolutehtmlzipfilepath = os.getcwd() + "/" +sysargv1 +"/"+ htmlZipFile
+    unzipfileqnxpath = "unzip -o " + absolutehtmlzipfilepath  +  " -d  " +absoluteRomLibpath 
     print("unzipfileqnxpath path is :",unzipfileqnxpath)
-    if sys.argv[4] == '1' :
+    if 1 :
         os.system(unzipfileqnxpath)
         print("was unziping unstripped.zip file...........")
     else :
-        print("run the script no overright file before")
-    
-    process_bar.show_process(90)
+        print("run the script no overright file before")   
+    #os.system("rm -rf " + absolutehtmlzipfilepath)  
 
-    #----------------------------------------------------------------------------
-    #run the gdb out put the gdb.html file
-    #
-    #---------------------------------------------------------------------------------
-    cmdline = "/opt/qnx700/host/linux/x86_64/usr/bin/ntoaarch64-gdb -batch -x autoScript.sh " +  navigationpath  +" "  +absoluteRomLIbpath +"/"+ sys.argv[3]  + " >" + sys.argv[3] + ".html"
-    os.system("export PATH=$PATH:" +absoluteRomLIbpath ) 
+def down_load_zip_from_network():
+    urllist2 = "http://tar1.telenav.com:8080/repository/telenav/client/trunk/Kipawa/Kipawa-qnx-700-1.26r." + sysargv2 + "_dev-unstripped.zip"      
+    absolutehtmlzipfilepath = os.getcwd() + "/" +sysargv1 +"/"+ htmlZipFile
+    print(urllist2 )   
+    findFiles = file_name_filter(absoluteRomLibpath ,'.zip')
+    if len(findFiles):
+        print ("the html zip file is existence!unzip directly!")
+    else:
+        print("begin to download untripzip from network ....................")
+        errorreturn = os.system("wget -P " + absoluteRomLibpath +" " + urllist2 )
+        #r = requests.get(urllist2 , stream=True,timeout=10)
+        if errorreturn !=0:
+            print("please checkout the ----softpkg  is right :" ,sysargv2 )
+        print(errorreturn )
+        #with open(absoluteRomLibpath+ "/"+htmlZipFile ,"wb") as pdf:
+            #for chunk in r.iter_content(chunk_size=1024):
+               # if chunk:
+                    #pdf.write(chunk)
+    print (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>-----------]85.00%")   
+ 
+def generate_gdbinfo_into_html():
+    cmdline = "/opt/qnx700/host/linux/x86_64/usr/bin/ntoaarch64-gdb -batch -x autoScript.sh " +  navigationpath  +" "  +absoluteRomLibpath +"/"+ sysargv3  + " >" + sysargv3 + ".html"
+    os.system("export PATH=$PATH:" +absoluteRomLibpath ) 
     #get file which form is html/
-    cpnavigationcore = "cp -a " + sys.argv[3] +" " + absoluteRomLIbpath
+    cpnavigationcore = "cp -a " + sysargv3 +" " + absoluteRomLibpath
     os.system(cpnavigationcore)
     os.system(cmdline)
     print("acpnavigati path is :", cpnavigationcore )
     #copy navigation to romlib
-    gethehtmldoc()
-    process_bar.show_process(100)
-    time.sleep(1) 
+    generate_html_doc()
+
+
+###################################################################################################################################
+###################################################################################################################################	
+###################################################################################################################################
+		
+if __name__ == "__main__":
+    os.system("export PATH=$PATH:/home/treasureFolder/traceAutoScript/traceTool/ROM86 ")
+    if sysargv4 == "yes" :
+        #meterial_prepare() 
+        #get_dependence_lib_list() 
+        download_lib_file_from_network()
+        down_load_zip_from_network()#download the cbd49e93_dev-unstripped.zip from network
+        unzip_zip()
+    elif sysargv4 !="no":
+        print("error : --cover format is not right please checkout !")
+        exit()
+    generate_gdbinfo_into_html()
+    
