@@ -1,3 +1,4 @@
+set solib-search-path /home/treasure/tracetool/ROM876
 echo  \n
 echo <html> \n
 echo <head>  \n
@@ -204,8 +205,8 @@ echo             </td>\n
 echo            <td>\n
 echo                 <p style="margin-bottom:4px; margin-top:2px;">Viewing stacktrace for event</p>\n
 echo                 <pre style=><strong>Platform:</strong>SYNC4</pre>
-echo                 <pre style=><strong>OS:</strong>sym-00041-Sync4-master-sync4-imx8-860</pre>
-echo                 <pre style=><strong>Date:</strong> 2019-07-29 02:34:38</pre>
+echo                 <pre style=><strong>OS:</strong>U5T-14G670-FAB-sym-00067-Sync4-master</pre>
+echo                 <pre style=><strong>Date:</strong> 2019-08-02 05:17:32</pre>
 echo                 <div style="margin-top: 4px; margin-left: 3px;">\n
 echo                     <i class="fa fa-envelope"></i>\n
 echo                     <a href="mailto:jtassie@ford.com;dmart526@ford.com;dyohan@ford.com;jliick@ford.com?subject=Problem with stacktrace 2DF6F690BB56A62DCD6A45CC6FE2CAA8">report a problem</a>\n
